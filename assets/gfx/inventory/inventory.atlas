@@ -1,0 +1,10 @@
+images {
+  image: "/assets/gfx/inventory/slot.png"
+}
+images {
+  image: "/assets/gfx/inventory/items/bone_01.png"
+}
+images {
+  image: "/assets/gfx/inventory/items/eye_01.png"
+}
+extrude_borders: 2

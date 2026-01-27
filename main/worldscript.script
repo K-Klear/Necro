@@ -1,0 +1,102 @@
+local MAP = require "modules.map_objects"
+
+math.randomseed(os.time())
+
+local wall_locations = {}
+wall_locations[0] = {}
+wall_locations[1] = {left = true}
+wall_locations[2] = {up = true}
+wall_locations[3] = {right = true}
+wall_locations[4] = {down = true}
+wall_locations[5] = {down = true, left = true}
+wall_locations[6] = {left = true, up = true}
+wall_locations[7] = {up = true, right = true}
+wall_locations[8] = {right = true, down = true}
+wall_locations[9] = {left = true, right = true}
+wall_locations[10] = {up = true, down = true}
+
+local floor = {}
+
+local TORCH_COLOUR_FIRE = vmath.vector4(1, 0.5, 0, 1)
+local TORCH_COLOUR_BLUE = vmath.vector4(0, 0.5, 1, 1)
+
+local debug = false
+function raycast(from, to, groups, options)
+	if not debug then return physics.raycast(from, to, groups, options) end
+	local count = 20
+	local function draw_line(self, handle, time_elapsed)
+		count = count - 1
+		if count < 0 then
+			timer.cancel(handle)
+		end
+		msg.post("@render:", hash("draw_line"), {start_point = from, end_point = to, color = vmath.vector4(1, 0, 0, 1)})
+	end
+	timer.delay(0.1, true, draw_line)
+	return physics.raycast(from, to, groups, options)
+end
+
+function init(self)
+	tilemap.set_visible("/world_2d#testworld", "floor", false)
+	local min_x, min_y, width, height = tilemap.get_bounds("/world_2d#testworld")
+	for x = min_x, min_x + width - 1 do
+		for y = min_y, min_y + height - 1 do
+			local tile = tilemap.get_tile("/world_2d#testworld", "walls", x, y)
+			local pos = vmath.vector3(x - 0.5, y - 0.5, 0)
+			local function create_wall(pos_x, pos_y, rotation)
+				local rot = vmath.quat_rotation_z(rotation)
+				local p = vmath.vector3(pos_x, pos_y, 0)
+				local new_wall = factory.create("#create_wall", p, rot)
+				MAP.walls[new_wall] = {go = new_wall, model = msg.url(nil, new_wall, "model")}
+			end
+			if wall_locations[tile].up then
+				create_wall(x - 0.5, y, 0)
+			end
+			if wall_locations[tile].down then
+				create_wall(x - 0.5, y - 1, math.pi)
+			end
+			if wall_locations[tile].left then
+				create_wall(x - 1, y - 0.5, math.pi * 0.5)
+			end
+			if wall_locations[tile].right then
+				create_wall(x, y - 0.5, math.pi * 1.5)
+			end
+			tile = tilemap.get_tile("/world_2d#testworld", "floor", x, y)
+			if tile == 12 then
+				local new_floor = factory.create("#create_floor", pos)
+				table.insert(floor, new_floor)
+				MAP.floors[new_floor] = {go = new_floor, model = msg.url(nil, new_floor, "model")}
+				MAP.tiles[x] = MAP.tiles[x] or {}
+				MAP.tiles[x][y] = MAP.tiles[x][y] or {}
+				MAP.tiles[x][y].floor = new_floor
+			end
+
+			tile = tilemap.get_tile("/world_2d#testworld", "objects", x, y)
+			local obj_scale = vmath.vector3(1/256)
+			local obj_rot = vmath.quat_rotation_x(math.pi * 0.5)
+			pos.z = 0.5
+			if tile == 11 then
+				local new_object = factory.create("#create_torch", pos, obj_rot, {x = x, y = y, tint = TORCH_COLOUR_FIRE, range = 4}, obj_scale)
+				table.insert(MAP.objects, new_object)
+			elseif tile == 13 then
+				local new_object = factory.create("#create_torch", pos, obj_rot, {x = x, y = y, tint = TORCH_COLOUR_BLUE, range = 4}, obj_scale)
+				table.insert(MAP.objects, new_object)
+			end
+		end
+	end
+	local new_rat = factory.create("#spawn_rat", vmath.vector3(0.5, 0.5, 0), vmath.quat_rotation_x(math.pi * 0.5), {x = 0, y = 0}, vmath.vector3(2/256))
+end
+
+function update(self, dt)
+	
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("draw_distance") then
+		for key, val in pairs(MAP.walls) do
+			go.set(val.model, "draw_distance.x", message.distance)
+		end
+		for key, val in pairs(MAP.floors) do
+			go.set(val.model, "draw_distance.x", message.distance)
+		end
+	end
+end

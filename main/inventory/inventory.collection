@@ -1,0 +1,397 @@
+name: "inventory"
+instances {
+  id: "inventory"
+  prototype: "/main/inventory/inventory.go"
+  children: "inventory_slot_01"
+  children: "inventory_slot_02"
+  children: "inventory_slot_03"
+  children: "inventory_slot_04"
+  children: "inventory_slot_05"
+  children: "inventory_slot_06"
+  children: "inventory_slot_07"
+  children: "inventory_slot_08"
+  children: "inventory_slot_09"
+  children: "inventory_slot_10"
+  children: "inventory_slot_11"
+  children: "inventory_slot_12"
+  children: "inventory_slot_13"
+  children: "inventory_slot_14"
+  children: "inventory_slot_arm_left"
+  children: "inventory_slot_arm_right"
+  children: "inventory_slot_eyes"
+  children: "inventory_slot_leg_left"
+  children: "inventory_slot_leg_right"
+}
+instances {
+  id: "inventory_slot_08"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -256.0
+    y: -196.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "8.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_01"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -256.0
+    y: -112.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "1.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_09"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -172.0
+    y: -196.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "9.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_02"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -172.0
+    y: -112.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "2.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_10"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -88.0
+    y: -196.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "10.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_03"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -88.0
+    y: -112.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "3.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_11"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -4.0
+    y: -196.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "11.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_04"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -4.0
+    y: -112.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "4.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_12"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: 80.0
+    y: -196.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "12.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_05"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: 80.0
+    y: -112.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "5.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_13"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: 164.0
+    y: -196.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "13.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_06"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: 164.0
+    y: -112.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "6.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_14"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: 248.0
+    y: -196.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "14.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_07"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: 248.0
+    y: -112.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "7.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "inventory_slot_eyes"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -84.0
+    y: 178.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "15.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "slot_type"
+      value: "eyes"
+      type: PROPERTY_TYPE_HASH
+    }
+  }
+}
+instances {
+  id: "inventory_slot_arm_left"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -148.0
+    y: 102.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "17.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "slot_type"
+      value: "arm_left"
+      type: PROPERTY_TYPE_HASH
+    }
+  }
+}
+instances {
+  id: "inventory_slot_arm_right"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -24.0
+    y: 102.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "16.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "slot_type"
+      value: "arm_right"
+      type: PROPERTY_TYPE_HASH
+    }
+  }
+}
+instances {
+  id: "inventory_slot_leg_left"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -152.0
+    y: 15.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "19.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "slot_type"
+      value: "leg_left"
+      type: PROPERTY_TYPE_HASH
+    }
+  }
+}
+instances {
+  id: "inventory_slot_leg_right"
+  prototype: "/main/inventory/inventory_slot.go"
+  position {
+    x: -24.0
+    y: 12.0
+  }
+  component_properties {
+    id: "inventory_slot"
+    properties {
+      id: "slot_id"
+      value: "18.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "slot_type"
+      value: "leg_right"
+      type: PROPERTY_TYPE_HASH
+    }
+  }
+}
+scale_along_z: 0
+embedded_instances {
+  id: "adjust"
+  children: "cursor"
+  data: ""
+  position {
+    x: -480.0
+    y: -320.0
+  }
+}
+embedded_instances {
+  id: "cursor"
+  data: "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_KINEMATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"cursor\\\"\\n"
+  "mask: \\\"menu\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_SPHERE\\n"
+  "    position {\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 1\\n"
+  "    id: \\\"sphere\\\"\\n"
+  "  }\\n"
+  "  data: 10.0\\n"
+  "}\\n"
+  "event_collision: false\\n"
+  "event_contact: false\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 824.0
+    y: 378.0
+  }
+}

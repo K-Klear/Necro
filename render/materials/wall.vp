@@ -1,0 +1,31 @@
+#version 140
+
+in highp vec4 position;
+in mediump vec3 normal;
+
+// When 'mtx_world' and 'mtx_normal' is specified as attributes,
+// instanced rendering is automatically triggered.
+// To read more about instancing in Defold, navigate to
+// https://defold.com/manuals/material/#instancing
+in mediump mat4 mtx_world;
+in mediump mat4 mtx_normal;
+
+out highp vec4 var_position;
+out highp vec4 var_position_world;
+out mediump vec3 var_normal;
+
+uniform vs_uniforms
+{
+    mediump mat4 mtx_view;
+    mediump mat4 mtx_proj;
+};
+
+void main()
+{
+    var_position_world = mtx_world * vec4(position.xyz, 1.0);
+    vec4 p = mtx_view * var_position_world;
+    var_position = p;
+
+    var_normal = (mtx_world * vec4(normal, 0.0)).xyz;
+    gl_Position = mtx_proj * p;
+}

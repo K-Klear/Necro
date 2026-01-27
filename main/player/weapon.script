@@ -1,0 +1,16 @@
+local cooldown = false
+
+
+function init(self)
+	msg.post("arms#right", hash("disable"))
+	msg.post("arms#left", hash("disable"))
+end
+
+
+function on_message(self, message_id, message, sender)
+	if not cooldown and message_id == hash("swing") then
+		--msg.post("arms#right", hash("enable"))
+		cooldown = true
+	end
+end
+

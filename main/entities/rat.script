@@ -1,0 +1,81 @@
+local MAP = require "modules.map_objects"
+
+local STATE_STAND = hash("stand")
+local STATE_WALK = hash("walk")
+local STATE_DEATH = hash("death")
+local STATE_ATTACK = hash("attack")
+
+go.property("x", 0)
+go.property("y", 0)
+go.property("facing", 0)
+--go.property("tint", vmath.vector4(1, 0, 0, 1))
+--go.property("range", 4)
+
+local function look_forward(self)
+	local pos = go.get_position()
+	local target_pos = pos + vmath.rotate(vmath.quat_rotation_z(self.facing), vmath.vector3(0, 0.5, 0))
+	local ray = raycast(pos, target_pos, {hash("wall")})
+	if ray then
+		if math.random() > 0.5 then
+			self.movement = hash("turn")
+		else
+			self.movement = hash("turn_right")
+		end
+	else
+		self.movement = hash("walk")
+	end
+end
+
+function init(self)
+	self.position = go.get_position()
+	self.state = STATE_STAND
+	self.movement = hash("stand")
+	self.dir = nil
+	timer.delay(0.1, true, look_forward)
+end
+
+local function update_animation(self, dir)
+	local cursor = go.get("#sprite", "cursor")
+	if dir == 0 then
+		sprite.play_flipbook("#sprite", "walk_A")
+	elseif dir == 1 or dir == 7 then
+		sprite.play_flipbook("#sprite", "walk_B")
+	elseif dir == 2 or dir == 6 then
+		sprite.play_flipbook("#sprite", "walk_C")
+	elseif dir == 3 or dir == 5 then
+		sprite.play_flipbook("#sprite", "walk_D")
+	elseif dir == 4 then
+		sprite.play_flipbook("#sprite", "walk_E")
+	end
+	sprite.set_hflip("#sprite", dir < 5)
+end
+
+function update(self)
+	local player_pos = go.get_position("/player")
+	local pos = go.get_position()
+	if self.movement == hash("turn") then
+		self.facing = self.facing + 0.2
+		if self.facing > 2 * math.pi then self.facing = self.facing - 2 * math.pi end
+	elseif self.movement == hash("turn_right") then
+		self.facing = self.facing - 0.2
+		if self.facing < 0 then self.facing = self.facing + 2 * math.pi end
+	elseif self.movement == hash("walk") then
+		pos = pos + vmath.rotate(vmath.quat_rotation_z(self.facing), vmath.vector3(0, 10/256, 0))
+		go.set_position(pos)
+	end
+	local angle = math.atan2(player_pos.y - pos.y, player_pos.x - pos.x) + 3 * (math.pi / 2)
+	local rot = vmath.quat_rotation_x(math.pi * 0.5) * vmath.quat_rotation_y(angle)
+	go.set_rotation(rot)
+	local eighth = math.pi / 4
+	
+	local dir = math.floor((angle - self.facing) / eighth)
+	if dir < 0 then dir = dir + 8 end
+	if not (dir == self.dir) then
+		update_animation(self, dir)
+		self.dir = dir
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	
+end

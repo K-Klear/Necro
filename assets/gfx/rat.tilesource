@@ -1,0 +1,88 @@
+image: "/assets/gfx/entities/rat.png"
+tile_width: 63
+tile_height: 63
+tile_margin: 1
+collision_groups: "default"
+animations {
+  id: "attack"
+  start_tile: 49
+  end_tile: 54
+  fps: 6
+}
+animations {
+  id: "death"
+  start_tile: 41
+  end_tile: 48
+  fps: 6
+}
+animations {
+  id: "stand_A"
+  start_tile: 1
+  end_tile: 1
+  playback: PLAYBACK_NONE
+  fps: 6
+}
+animations {
+  id: "stand_B"
+  start_tile: 9
+  end_tile: 9
+  playback: PLAYBACK_NONE
+  fps: 6
+}
+animations {
+  id: "stand_C"
+  start_tile: 17
+  end_tile: 17
+  playback: PLAYBACK_NONE
+  fps: 6
+}
+animations {
+  id: "stand_D"
+  start_tile: 25
+  end_tile: 25
+  playback: PLAYBACK_NONE
+  fps: 6
+}
+animations {
+  id: "stand_E"
+  start_tile: 33
+  end_tile: 33
+  playback: PLAYBACK_NONE
+  fps: 6
+}
+animations {
+  id: "walk_A"
+  start_tile: 2
+  end_tile: 5
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 6
+}
+animations {
+  id: "walk_B"
+  start_tile: 10
+  end_tile: 13
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 6
+}
+animations {
+  id: "walk_C"
+  start_tile: 18
+  end_tile: 21
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 6
+}
+animations {
+  id: "walk_D"
+  start_tile: 26
+  end_tile: 29
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 6
+}
+animations {
+  id: "walk_E"
+  start_tile: 34
+  end_tile: 37
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 6
+}
+extrude_borders: 2

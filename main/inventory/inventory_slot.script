@@ -1,0 +1,33 @@
+go.property("slot_id", 0)
+go.property("slot_type", hash("backpack"))
+
+local INV = require "modules.inventory"
+
+local COLOUR_NORMAL = vmath.vector4(1)
+local COLOUR_NETURAL = vmath.vector4(1, 1, 0, 1)
+local COLOUR_FORBIDDEN = vmath.vector4(1, 0, 0, 1)
+
+
+function init(self)
+
+end
+
+function on_message(self, message_id, message, sender)
+	if message.enter then
+		if INV.check_slot_eligibility(self.slot_id) then
+			go.set("#sprite", "tint", COLOUR_NETURAL)
+		else
+			go.set("#sprite", "tint", COLOUR_FORBIDDEN)
+		end
+		INV.hover = self.slot_id
+		if INV.slots[self.slot_id].item then
+			msg.post("/inventory", hash("hover_start"))
+		end
+	elseif message.enter == false then
+		go.set("#sprite", "tint", COLOUR_NORMAL)
+		if INV.hover == self.slot_id then
+			INV.hover = nil
+			msg.post("/inventory", hash("hover_end"))
+		end
+	end
+end

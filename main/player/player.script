@@ -1,0 +1,333 @@
+local MAP = require "modules.map_objects"
+local INV = require "modules.inventory"
+local STATS = require "modules.stats"
+
+local move_vector = vmath.vector3(0, 0, 0)
+local move_speed = 2.5 / 256
+local run_multiplier = 3
+local rotation_speed = 0.02
+local mouse_rotation_sensitivity = 0.2
+local mouse_pitch_sensitivity = 0.2
+local max_pitch_angle = 75
+local player_rotation = vmath.quat(0, 0, 0, 1)
+local player_position = vmath.vector3(0, 0, 0.5)
+local player_x, player_y = 0, 0
+local camera_pitch = 0
+local active_camera = 1
+local cam_ortho_position = vmath.vector3(0, 6, 0)
+local cam_ortho_rotation = vmath.quat(0, 0, 0, 1)
+local cam_ortho_move_vector = vmath.vector3(0)
+
+local closest_torch_tab, second_closest_torch_tab
+
+local MOVE_MODE_NORMAL = hash("normal")
+local MOVE_MODE_SHAMBLE = hash("shamble")
+local MOVE_MODE_CRAWL = hash("crawl")
+local move_mode = MOVE_MODE_NORMAL
+
+local CAMERA_DEBUG = "#cam_2d"
+local CAMERA_POV = "/cam_pitch#camera"
+local CAMERA_ORTHO = "/cam_orthographic_pitch#camera_orthographic"
+
+local function switch_cam()
+	active_camera = active_camera + 1
+	if active_camera > 3 then active_camera = 1 end
+	if active_camera == 1 then
+		msg.post(CAMERA_DEBUG, "enable")
+		msg.post(CAMERA_POV, "disable")
+		msg.post(CAMERA_ORTHO, "disable")
+		msg.post("#sprite", "enable")
+		msg.post("/world_2d#testworld", "enable")
+		msg.post("/world", hash("draw_distance"), {distance = STATS.sight_range})
+		STATS.set_render_target(hash("normal"))
+	elseif active_camera == 2 then
+		msg.post(CAMERA_DEBUG, "disable")
+		msg.post(CAMERA_POV, "enable")
+		msg.post(CAMERA_ORTHO, "disable")
+		msg.post("#sprite", "disable")
+		msg.post("/world_2d#testworld", "disable")
+		STATS.set_render_target()
+	else
+		msg.post(CAMERA_DEBUG, "disable")
+		msg.post(CAMERA_POV, "disable")
+		msg.post(CAMERA_ORTHO, "enable")
+		msg.post("#sprite", "disable")
+		msg.post("/world_2d#testworld", "disable")
+		msg.post("/world", hash("draw_distance"), {distance = 50})
+		STATS.set_render_target(hash("normal"))
+	end
+	window.set_mouse_lock(not (active_camera == 1))
+end
+
+local function set_move_mode(new_move_mode)
+	if move_mode == new_move_mode then return end
+	if new_move_mode == MOVE_MODE_CRAWL then
+		go.animate(".", "position.z", go.PLAYBACK_ONCE_FORWARD, 0.1, go.EASING_OUTSINE, 0.4, 0, function() player_position.z = 0.1 end)
+	elseif move_mode == MOVE_MODE_CRAWL then
+		go.animate(".", "position.z", go.PLAYBACK_ONCE_FORWARD, 0.5, go.EASING_OUTSINE, 0.8, 0, function() player_position.z = 0.5 end)
+	end
+	move_mode = new_move_mode
+end
+
+local function apply_player_stats()
+	local left = INV.slots[19].item
+	local right = INV.slots[18].item
+	if not (left and right) then
+		set_move_mode(MOVE_MODE_CRAWL)
+	elseif (left.movement_mode == MOVE_MODE_SHAMBLE) or (right.movement_mode == MOVE_MODE_SHAMBLE) then
+		set_move_mode(MOVE_MODE_SHAMBLE)
+	else
+		set_move_mode(MOVE_MODE_NORMAL)
+	end
+	local eyes = INV.slots[15].item
+	if not eyes then
+		STATS.sight_range = 0
+	else
+		STATS.sight_range = eyes.sight_range
+		if eyes.render_target then
+			STATS.render_target = eyes.render_target
+			if active_camera == 2 then
+				STATS.set_render_target()
+			end
+		end
+	end
+	msg.post("/world", hash("draw_distance"), {distance = STATS.sight_range})
+end
+
+function init(self)
+	msg.post("#", hash("acquire_input_focus"))
+	--msg.post("/rt_quad", hash("disable"))
+	msg.post("/rt_sphere", hash("disable"))
+	msg.post("/rt_segmented_01", hash("disable"))
+	msg.post("/rt_segmented_02", hash("disable"))
+	msg.post("/rt_segmented_03", hash("disable"))
+	msg.post("/rt_segmented_04", hash("disable"))
+	msg.post("/rt_segmented_05", hash("disable"))
+	switch_cam()
+	set_move_mode(MOVE_MODE_NORMAL)
+	for i = 1, 9 do
+		msg.post("/cam_pitch#model"..i, hash("disable"))
+	end
+end
+
+local function apply_torch()
+	if closest_torch_tab then
+		for i = 1, 9 do
+			go.set("/cam_pitch#model"..i, "light_1", vmath.vector4(closest_torch_tab.pos.x, closest_torch_tab.pos.y, closest_torch_tab.pos.z, closest_torch_tab.range))
+			go.set("/cam_pitch#model"..i, "tint_1", closest_torch_tab.tint)
+		end
+	else
+		for i = 1, 9 do
+			go.set("/cam_pitch#model"..i, "light_1", vmath.vector4(0, 0, 0, 1))
+			go.set("/cam_pitch#model"..i, "tint_1", vmath.vector4(0))
+		end
+	end
+	if second_closest_torch_tab then
+		for i = 1, 9 do
+			go.set("/cam_pitch#model"..i, "light_2", vmath.vector4(second_closest_torch_tab.pos.x, second_closest_torch_tab.pos.y, second_closest_torch_tab.pos.z, second_closest_torch_tab.range))
+			go.set("/cam_pitch#model"..i, "tint_2", second_closest_torch_tab.tint)
+		end
+	else
+		for i = 1, 9 do
+			go.set("/cam_pitch#model"..i, "light_2", vmath.vector4(0, 0, 0, 1))
+			go.set("/cam_pitch#model"..i, "tint_2", vmath.vector4(0))
+		end
+	end
+end
+
+local function find_closest_torch(torch_tab)
+	local closest_torch = {}
+	if torch_tab then
+		for key, val in ipairs(torch_tab) do
+			local sq = vmath.length_sqr(player_position - val.pos)
+			table.insert(closest_torch, {tab = val, dist = sq})
+		end
+		table.sort(closest_torch, function(a, b) return a.dist < b.dist end)
+	end
+	if closest_torch[2] then
+		closest_torch_tab = closest_torch[1].tab
+		second_closest_torch_tab = closest_torch[2].tab
+	elseif closest_torch[1] then
+		closest_torch_tab = closest_torch[1].tab
+		second_closest_torch_tab = nil
+	else
+		closest_torch_tab = nil
+		second_closest_torch_tab = nil
+	end
+	apply_torch()
+end
+
+local function set_player_position(change)
+	change = change or vmath.vector3()
+	player_position = player_position + change
+	go.set_position(player_position, ".")
+	local new_x, new_y = math.ceil(player_position.x), math.ceil(player_position.y)
+	if not (new_x == player_x and new_y == player_y) then
+		player_x, player_y = new_x, new_y
+		if MAP.tiles[player_x] and MAP.tiles[player_x][player_y] then
+			local id = MAP.tiles[player_x][player_y].floor
+			local torches = MAP.floors[id].torches
+			find_closest_torch(torches)
+		end
+	else
+		apply_torch()
+	end
+end
+
+local step_in_progress = false
+local shamble_progress = 65
+
+function update(self, dt)
+	if move_mode == MOVE_MODE_NORMAL then
+		set_player_position(vmath.rotate(player_rotation, move_vector))
+	elseif move_mode == MOVE_MODE_SHAMBLE then
+		local shamble_move
+		if step_in_progress then
+			shamble_progress = shamble_progress - 1
+			if shamble_progress > 45 then
+				shamble_move = vmath.rotate(player_rotation, step_in_progress * 3 / 256)
+				player_position.z = player_position.z - 0.004
+			elseif shamble_progress > 10 then
+				player_position.z = player_position.z + 0.002
+				shamble_move = vmath.rotate(player_rotation, step_in_progress / 256)
+			elseif shamble_progress > -20 then
+				player_position.z = player_position.z + 0.002
+			else
+				shamble_progress = 75
+				step_in_progress = false
+				player_position.z = 0.5
+			end
+		elseif vmath.length_sqr(move_vector) > 0 then
+			step_in_progress = vmath.normalize(move_vector)
+		end
+		set_player_position(shamble_move)
+	elseif move_mode == MOVE_MODE_CRAWL then
+		if vmath.length_sqr(move_vector) > 0 then
+			set_player_position(vmath.rotate(player_rotation, vmath.normalize(move_vector) / 256))
+		else
+			set_player_position()
+		end
+	end
+	cam_ortho_position = cam_ortho_position + vmath.rotate(cam_ortho_rotation, cam_ortho_move_vector)
+	go.set_position(cam_ortho_position, "cam_orthographic")
+	cam_ortho_move_vector = vmath.vector3(0)
+	move_vector = vmath.vector3(0)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("wall") then
+			set_player_position(message.normal * message.distance)
+		end
+	elseif message_id == hash("inventory_toggled") then
+		if message.open then
+			msg.post(".", hash("release_input_focus"))
+		else
+			msg.post(".", hash("acquire_input_focus"))
+			window.set_mouse_lock(not (active_camera == 1))
+			apply_player_stats()
+		end
+	end
+end
+
+local function toggle_inventory()
+	window.set_mouse_lock(false)
+	INV.toggle()
+end
+
+
+local cooldown = false
+
+local f = {{140, 267}, {184, 341}, {208, 380}, {225, 359}, {264, 328}, {283, 297}, {307, 251}, {346, 175}, {292, 86}}
+local frame_dimensions = {}
+for key, val in ipairs(f) do
+	frame_dimensions[key] = vmath.vector3(f[key][1] / 256, f[key][2] / 256, 1)
+end
+f = nil
+
+local shift_held = false
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and not cooldown then
+		cooldown = true
+		local frame = 1
+		local function animate_arm(self, handle, time_elapsed)
+			msg.post("/cam_pitch#model"..frame, hash("disable"))
+			frame = frame + 1
+			if frame > 9 then
+				timer.cancel(handle)
+				cooldown = false
+			else
+				msg.post("/cam_pitch#model"..frame, hash("enable"))
+				go.set_scale(frame_dimensions[frame], "/cam_pitch")
+			end
+		end
+		local sc = frame_dimensions[1]
+		go.set_scale(sc, "/cam_pitch")
+		msg.post("/cam_pitch#model1", hash("enable"))
+		timer.delay(0.07, true, animate_arm)
+	end
+	if action_id == hash("key_w") then
+		if active_camera < 3 then
+			if shift_held then
+				move_vector.y = move_vector.y + move_speed * run_multiplier
+			else
+				move_vector.y = move_vector.y + move_speed
+			end
+		else
+			cam_ortho_move_vector.y = cam_ortho_move_vector.y - move_speed * 0.01
+		end
+	elseif action_id == hash("key_s") then
+		if active_camera < 3 then
+			if shift_held then
+				move_vector.y = move_vector.y - move_speed * run_multiplier
+			else
+				move_vector.y = move_vector.y - move_speed
+			end
+		else
+			cam_ortho_move_vector.y = cam_ortho_move_vector.y + move_speed * 0.01
+		end
+	elseif action_id == hash("key_a") then
+		if active_camera == 1 then
+			player_rotation = player_rotation * vmath.quat_rotation_z(rotation_speed)
+			go.set_rotation(player_rotation, ".")
+		elseif active_camera == 2 then
+			if shift_held then
+				move_vector.x = move_vector.x - move_speed * run_multiplier
+			else
+				move_vector.x = move_vector.x - move_speed
+			end
+		else
+			cam_ortho_move_vector.x = cam_ortho_move_vector.x - move_speed * 0.01
+		end
+	elseif action_id == hash("key_d") then
+		if active_camera == 1 then
+			player_rotation = player_rotation * vmath.quat_rotation_z(-rotation_speed)
+			go.set_rotation(player_rotation, ".")
+		elseif active_camera == 2 then
+			if shift_held then
+				move_vector.x = move_vector.x + move_speed * run_multiplier
+			else
+				move_vector.x = move_vector.x + move_speed
+			end
+		else
+			cam_ortho_move_vector.x = cam_ortho_move_vector.x + move_speed * 0.01
+		end
+	elseif action_id == hash("key_space") and action.pressed then
+		switch_cam()
+	elseif action_id == hash("key_tab") and action.pressed then
+		toggle_inventory()
+	elseif action_id == hash("key_lshift") then
+		shift_held = not action.released
+	elseif not action_id then
+		if active_camera == 2 then
+			player_rotation = player_rotation * vmath.quat_rotation_z(-action.dx * rotation_speed * mouse_rotation_sensitivity)
+			camera_pitch = math.min(math.max(camera_pitch + action.dy * mouse_pitch_sensitivity, -max_pitch_angle), max_pitch_angle)
+			go.set("/cam_pitch", "euler.x", camera_pitch)
+			go.set_rotation(player_rotation, ".")
+		elseif active_camera == 3 then
+			local yaw = vmath.quat_rotation_y(-action.dx * rotation_speed * mouse_rotation_sensitivity)
+			cam_ortho_rotation = cam_ortho_rotation * yaw
+			go.set_rotation(cam_ortho_rotation, "/cam_orthographic")
+		end
+	end
+end

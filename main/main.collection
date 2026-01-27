@@ -1,0 +1,249 @@
+name: "main"
+instances {
+  id: "world"
+  prototype: "/main/world.go"
+  children: "world_2d"
+}
+instances {
+  id: "player"
+  prototype: "/main/player/player.go"
+  children: "cam_pov"
+  position {
+    z: 0.5
+  }
+}
+instances {
+  id: "world_2d"
+  prototype: "/main/world_2d.go"
+  position {
+    z: 0.1
+  }
+  scale3 {
+    x: 0.003906
+    y: 0.003906
+    z: 0.003906
+  }
+}
+instances {
+  id: "cam_pitch"
+  prototype: "/main/player/cam_pitch.go"
+}
+scale_along_z: 0
+embedded_instances {
+  id: "cam_orthographic"
+  children: "cam_orthographic_pitch"
+  data: ""
+}
+embedded_instances {
+  id: "cam_orthographic_pitch"
+  data: "embedded_components {\n"
+  "  id: \"camera_orthographic\"\n"
+  "  type: \"camera\"\n"
+  "  data: \"aspect_ratio: 1.0\\n"
+  "fov: 0.7854\\n"
+  "near_z: 0.01\\n"
+  "far_z: 1000.0\\n"
+  "auto_aspect_ratio: 1\\n"
+  "\"\n"
+  "}\n"
+  ""
+  rotation {
+    x: -0.38268343
+    w: 0.9238795
+  }
+}
+embedded_instances {
+  id: "cam_pov"
+  children: "cam_pitch"
+  data: ""
+  rotation {
+    x: 0.70710677
+    w: 0.70710677
+  }
+}
+embedded_instances {
+  id: "render_target"
+  children: "rt_quad"
+  children: "rt_segmented"
+  children: "rt_sphere"
+  data: ""
+}
+embedded_instances {
+  id: "rt_quad"
+  data: "embedded_components {\n"
+  "  id: \"quad\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/builtins/assets/meshes/quad_2x2.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/render/materials/rt.material\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "rt_sphere"
+  data: "embedded_components {\n"
+  "  id: \"sphere\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/models/sphere_halved.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/render/materials/rt.material\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  rotation {
+    y: 0.70710677
+    w: 0.70710677
+  }
+  scale3 {
+    x: 2.0
+    y: 2.0
+    z: 2.0
+  }
+}
+embedded_instances {
+  id: "rt_segmented"
+  children: "rt_segmented_01"
+  children: "rt_segmented_02"
+  children: "rt_segmented_03"
+  children: "rt_segmented_04"
+  children: "rt_segmented_05"
+  data: ""
+}
+embedded_instances {
+  id: "rt_segmented_01"
+  data: "embedded_components {\n"
+  "  id: \"sphere\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/models/sphere_halved.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/render/materials/rt.material\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  rotation {
+    y: 0.70710677
+    w: 0.70710677
+  }
+}
+embedded_instances {
+  id: "rt_segmented_02"
+  data: "embedded_components {\n"
+  "  id: \"sphere\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/models/sphere_halved.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/render/materials/rt.material\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 0.5
+    y: 0.5
+  }
+  rotation {
+    y: 0.70710677
+    w: 0.70710677
+  }
+  scale3 {
+    x: 0.5
+    y: 0.5
+    z: 0.5
+  }
+}
+embedded_instances {
+  id: "rt_segmented_03"
+  data: "embedded_components {\n"
+  "  id: \"sphere\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/models/sphere_halved.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/render/materials/rt.material\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: -0.5
+    y: 0.5
+  }
+  rotation {
+    y: 0.70710677
+    w: 0.70710677
+  }
+  scale3 {
+    x: 0.5
+    y: 0.5
+    z: 0.5
+  }
+}
+embedded_instances {
+  id: "rt_segmented_04"
+  data: "embedded_components {\n"
+  "  id: \"sphere\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/models/sphere_halved.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/render/materials/rt.material\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: -0.5
+    y: -0.5
+  }
+  rotation {
+    y: 0.70710677
+    w: 0.70710677
+  }
+  scale3 {
+    x: 0.5
+    y: 0.5
+    z: 0.5
+  }
+}
+embedded_instances {
+  id: "rt_segmented_05"
+  data: "embedded_components {\n"
+  "  id: \"sphere\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/models/sphere_halved.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/render/materials/rt.material\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 0.5
+    y: -0.5
+  }
+  rotation {
+    y: 0.70710677
+    w: 0.70710677
+  }
+  scale3 {
+    x: 0.5
+    y: 0.5
+    z: 0.5
+  }
+}

@@ -1,0 +1,119 @@
+images {
+  image: "/assets/gfx/player.png"
+}
+images {
+  image: "/assets/gfx/weapons/zombie_arm.png"
+}
+images {
+  image: "/assets/gfx/objects/torch.png"
+}
+animations {
+  id: "zombie_arm_attack_left"
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_01.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_02.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_03.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_04.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_05.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_06.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_07.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_08.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_09.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  fps: 10
+}
+animations {
+  id: "zombie_arm_attack_right"
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_01.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_02.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_03.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_04.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_05.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_06.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_07.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_08.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_09.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  fps: 10
+  flip_horizontal: 1
+}
+animations {
+  id: "frozne"
+  images {
+    image: "/assets/gfx/weapons/zombie_arm_07.png"
+    pivot_x: 1.0
+    pivot_y: 1.0
+  }
+  playback: PLAYBACK_NONE
+  flip_horizontal: 1
+}
+extrude_borders: 2

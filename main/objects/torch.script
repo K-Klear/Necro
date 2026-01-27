@@ -1,0 +1,62 @@
+local MAP = require "modules.map_objects"
+
+go.property("x", 0)
+go.property("y", 0)
+go.property("tint", vmath.vector4(1, 0, 0, 1))
+go.property("range", 4)
+
+local function find_wall(self, target)
+	local ray = raycast(self.position, self.position + target, {hash("wall"), hash("floor")}, {all = true})
+	if ray then
+		for key, val in ipairs(ray) do
+			if val.group == hash("floor") then
+				if not self.floor_list[val.id] then
+					self.floor_list[val.id] = true
+				end
+			elseif val.group == hash("wall") then
+				if not self.wall_list[val.id] then
+					self.wall_list[val.id] = true
+				end
+				break
+			end
+		end
+	end
+end
+
+local function apply_light(self)
+	local id = MAP.tiles[self.x][self.y].floor
+	self.floor_list[id] = true
+	for key, val in pairs(self.wall_list) do
+		MAP.walls[key].torches = MAP.walls[key].torches or {}
+		table.insert(MAP.walls[key].torches, {pos = self.position, tint = self.tint, range = self.range})
+	end
+	for key, val in pairs(self.floor_list) do
+		MAP.floors[key].torches = MAP.floors[key].torches or {}
+		table.insert(MAP.floors[key].torches, {pos = self.position, tint = self.tint, range = self.range})
+	end
+	MAP.torch_count = MAP.torch_count - 1
+	if MAP.torch_count < 1 then
+		MAP.apply_torches()
+	end
+end
+
+function init(self)
+	MAP.torch_count = MAP.torch_count + 1
+	self.wall_list = {}
+	self.floor_list = {}
+	self.position = go.get_position()
+	table.insert(MAP.torches, {position = self.position, tint = self.tint})
+	local function draw()
+		for i = 0, 360, 5 do
+			local rot = vmath.quat_rotation_z(math.rad(i))
+			find_wall(self, vmath.rotate(rot, vmath.vector3(self.range + 0.5, 0, 0)))
+		end
+		apply_light(self)
+	end
+	timer.delay(0.1, false, draw)
+end
+
+
+function on_message(self, message_id, message, sender)
+	
+end

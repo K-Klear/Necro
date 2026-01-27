@@ -1,0 +1,51 @@
+name: "sprite"
+tags: "weapon"
+vertex_program: "/render/materials/weapon_3d.vp"
+fragment_program: "/render/materials/weapon_3d.fp"
+vertex_space: VERTEX_SPACE_LOCAL
+vertex_constants {
+  name: "mtx_worldviewproj"
+  type: CONSTANT_TYPE_WORLDVIEWPROJ
+}
+vertex_constants {
+  name: "mtx_world"
+  type: CONSTANT_TYPE_WORLD
+}
+fragment_constants {
+  name: "light_1"
+  type: CONSTANT_TYPE_USER
+  value {
+  }
+}
+fragment_constants {
+  name: "tint_1"
+  type: CONSTANT_TYPE_USER
+  value {
+  }
+}
+fragment_constants {
+  name: "light_2"
+  type: CONSTANT_TYPE_USER
+  value {
+  }
+}
+fragment_constants {
+  name: "tint_2"
+  type: CONSTANT_TYPE_USER
+  value {
+  }
+}
+samplers {
+  name: "tex0"
+  wrap_u: WRAP_MODE_CLAMP_TO_EDGE
+  wrap_v: WRAP_MODE_CLAMP_TO_EDGE
+  filter_min: FILTER_MODE_MIN_DEFAULT
+  filter_mag: FILTER_MODE_MAG_DEFAULT
+}
+samplers {
+  name: "tex_light"
+  wrap_u: WRAP_MODE_CLAMP_TO_EDGE
+  wrap_v: WRAP_MODE_CLAMP_TO_EDGE
+  filter_min: FILTER_MODE_MIN_DEFAULT
+  filter_mag: FILTER_MODE_MAG_DEFAULT
+}
