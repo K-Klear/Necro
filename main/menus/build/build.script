@@ -1,0 +1,54 @@
+local BLD = require "modules.build"
+
+
+local function open_build()
+	msg.post(".", hash("acquire_input_focus"))
+	msg.post(".", hash("enable"))
+	for key, val in pairs(BLD.buildings) do
+		msg.post(val.button, hash("enable"))
+	end
+end
+
+local function close_build()
+	msg.post(".", hash("disable"))
+	for key, val in pairs(BLD.buildings) do
+		msg.post(val.button, hash("disable"))
+	end
+	msg.post(".", hash("release_input_focus"))
+end
+
+function init(self)
+	msg.post(".", hash("disable"))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("hover_start") then
+		if BLD.hover then
+			msg.post("#lbl_building_name", hash("enable"))
+			label.set_text("#lbl_building_name", BLD.buildings[BLD.hover].name)
+		end
+	elseif message_id == hash("hover_end") then
+		msg.post("#lbl_building_name", hash("disable"))
+	elseif message_id == hash("open") then
+		open_build()
+	elseif message_id == hash("close") then
+		close_build()
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and action.pressed then
+		BLD.selected_building = BLD.hover
+		if BLD.hover then
+			msg.post("main:/build_cursor", hash("enable"))
+			BLD.valid_placement = true
+		else
+			msg.post("main:/build_cursor", hash("disable"))
+		end
+		BLD.toggle()
+	elseif (action_id == hash("key_b") or action_id == hash("key_esc")) and action.pressed then
+		BLD.toggle()
+	elseif not action_id then
+		go.set_position(vmath.vector3(action.x, action.y, 0), "/cursor")
+	end
+end

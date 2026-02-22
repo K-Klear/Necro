@@ -7,6 +7,9 @@ images {
 images {
   image: "/assets/gfx/objects/torch.png"
 }
+images {
+  image: "/assets/gfx/red_dot.png"
+}
 animations {
   id: "zombie_arm_attack_left"
   images {

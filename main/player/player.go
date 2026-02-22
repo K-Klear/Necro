@@ -36,9 +36,6 @@ embedded_components {
   "  texture: \"/assets/gfx/player.atlas\"\n"
   "}\n"
   ""
-  position {
-    z: -0.5
-  }
   scale {
     x: 0.003906
     y: 0.003906
@@ -55,5 +52,23 @@ embedded_components {
   "auto_aspect_ratio: 1\n"
   "orthographic_projection: 1\n"
   "orthographic_zoom: 100.0\n"
+  ""
+}
+embedded_components {
+  id: "hit"
+  type: "sound"
+  data: "sound: \"/assets/sound/hand_hit_wall.wav\"\n"
+  ""
+}
+embedded_components {
+  id: "hit_wall"
+  type: "sound"
+  data: "sound: \"/assets/sound/hand_hit_wall.wav\"\n"
+  ""
+}
+embedded_components {
+  id: "miss"
+  type: "sound"
+  data: "sound: \"/assets/sound/hand_miss.wav\"\n"
   ""
 }

@@ -1,13 +1,20 @@
 local MAP = require "modules.map_objects"
+local INV = require "modules.inventory"
 
 local STATE_STAND = hash("stand")
 local STATE_WALK = hash("walk")
 local STATE_DEATH = hash("death")
 local STATE_ATTACK = hash("attack")
 
+local HALF_PI = math.pi * 0.5
+
 go.property("x", 0)
 go.property("y", 0)
 go.property("facing", 0)
+go.property("health", 20)
+go.property("height", 0.3)
+go.property("name", hash("rat"))
+go.property("container_id", 0)
 --go.property("tint", vmath.vector4(1, 0, 0, 1))
 --go.property("range", 4)
 
@@ -26,16 +33,8 @@ local function look_forward(self)
 	end
 end
 
-function init(self)
-	self.position = go.get_position()
-	self.state = STATE_STAND
-	self.movement = hash("stand")
-	self.dir = nil
-	timer.delay(0.1, true, look_forward)
-end
-
 local function update_animation(self, dir)
-	local cursor = go.get("#sprite", "cursor")
+	--local cursor = go.get("#sprite", "cursor")
 	if dir == 0 then
 		sprite.play_flipbook("#sprite", "walk_A")
 	elseif dir == 1 or dir == 7 then
@@ -50,9 +49,22 @@ local function update_animation(self, dir)
 	sprite.set_hflip("#sprite", dir < 5)
 end
 
+function init(self)
+	self.position = go.get_position()
+	self.state = STATE_STAND
+	self.movement = hash("stand")
+	self.dir = nil
+	timer.delay(0.1, true, look_forward)
+end
+
 function update(self)
-	local player_pos = go.get_position("/player")
 	local pos = go.get_position()
+	if self.health < 1 then
+		local angle = math.atan2(MAP.player_position.y - pos.y, MAP.player_position.x - pos.x) + 3 * HALF_PI
+		local rot = vmath.quat_rotation_x(math.pi * 0.5) * vmath.quat_rotation_y(angle)
+		go.set_rotation(rot)
+		return
+	end
 	if self.movement == hash("turn") then
 		self.facing = self.facing + 0.2
 		if self.facing > 2 * math.pi then self.facing = self.facing - 2 * math.pi end
@@ -60,14 +72,13 @@ function update(self)
 		self.facing = self.facing - 0.2
 		if self.facing < 0 then self.facing = self.facing + 2 * math.pi end
 	elseif self.movement == hash("walk") then
-		pos = pos + vmath.rotate(vmath.quat_rotation_z(self.facing), vmath.vector3(0, 10/256, 0))
+		pos = pos + vmath.rotate(vmath.quat_rotation_z(self.facing), vmath.vector3(0, 1/256, 0))
 		go.set_position(pos)
 	end
-	local angle = math.atan2(player_pos.y - pos.y, player_pos.x - pos.x) + 3 * (math.pi / 2)
-	local rot = vmath.quat_rotation_x(math.pi * 0.5) * vmath.quat_rotation_y(angle)
+	local angle = math.atan2(MAP.player_position.y - pos.y, MAP.player_position.x - pos.x) + 3 * HALF_PI
+	local rot = vmath.quat_rotation_x(HALF_PI) * vmath.quat_rotation_y(angle)
 	go.set_rotation(rot)
 	local eighth = math.pi / 4
-	
 	local dir = math.floor((angle - self.facing) / eighth)
 	if dir < 0 then dir = dir + 8 end
 	if not (dir == self.dir) then
@@ -77,5 +88,12 @@ function update(self)
 end
 
 function on_message(self, message_id, message, sender)
-	
+	if message_id == hash("hit") and self.health > 1 then
+		self.health = self.health - message.damage
+		if self.health < 1 then
+			sprite.play_flipbook("#sprite", "death")
+			INV.create_container(self)
+			INV.containers[self.container_id].slots[23].item = {type = "bone_dust", count = math.random(15, 80), slot = 21}
+		end
+	end
 end

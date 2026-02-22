@@ -1,6 +1,6 @@
 components {
   id: "inventory_slot"
-  component: "/main/inventory/inventory_slot.script"
+  component: "/main/menus/inventory/inventory_slot.script"
 }
 embedded_components {
   id: "sprite"
@@ -9,7 +9,7 @@ embedded_components {
   "material: \"/render/materials/menu_sprite.material\"\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/assets/gfx/inventory/inventory.atlas\"\n"
+  "  texture: \"/assets/gfx/menus.atlas\"\n"
   "}\n"
   ""
 }

@@ -1,0 +1,80 @@
+components {
+  id: "build_button"
+  component: "/main/menus/build/build_button.script"
+}
+embedded_components {
+  id: "sprite"
+  type: "sprite"
+  data: "default_animation: \"slot\"\n"
+  "material: \"/render/materials/menu_sprite.material\"\n"
+  "slice9 {\n"
+  "  x: 16.0\n"
+  "  y: 16.0\n"
+  "  z: 16.0\n"
+  "  w: 16.0\n"
+  "}\n"
+  "size {\n"
+  "  x: 128.0\n"
+  "  y: 128.0\n"
+  "}\n"
+  "size_mode: SIZE_MODE_MANUAL\n"
+  "textures {\n"
+  "  sampler: \"texture_sampler\"\n"
+  "  texture: \"/assets/gfx/menus.atlas\"\n"
+  "}\n"
+  ""
+}
+embedded_components {
+  id: "co"
+  type: "collisionobject"
+  data: "type: COLLISION_OBJECT_TYPE_TRIGGER\n"
+  "mass: 0.0\n"
+  "friction: 0.1\n"
+  "restitution: 0.5\n"
+  "group: \"menu\"\n"
+  "mask: \"cursor\"\n"
+  "embedded_collision_shape {\n"
+  "  shapes {\n"
+  "    shape_type: TYPE_BOX\n"
+  "    position {\n"
+  "    }\n"
+  "    rotation {\n"
+  "    }\n"
+  "    index: 0\n"
+  "    count: 3\n"
+  "  }\n"
+  "  data: 64.0\n"
+  "  data: 64.0\n"
+  "  data: 10.0\n"
+  "}\n"
+  ""
+}
+embedded_components {
+  id: "image"
+  type: "sprite"
+  data: "default_animation: \"beacon\"\n"
+  "material: \"/render/materials/menu_sprite.material\"\n"
+  "slice9 {\n"
+  "  x: 16.0\n"
+  "  y: 16.0\n"
+  "  z: 16.0\n"
+  "  w: 16.0\n"
+  "}\n"
+  "size {\n"
+  "  x: 128.0\n"
+  "  y: 128.0\n"
+  "}\n"
+  "size_mode: SIZE_MODE_MANUAL\n"
+  "textures {\n"
+  "  sampler: \"texture_sampler\"\n"
+  "  texture: \"/assets/gfx/menus.atlas\"\n"
+  "}\n"
+  ""
+  position {
+    z: 0.1
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+}

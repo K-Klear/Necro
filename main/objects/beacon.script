@@ -45,7 +45,6 @@ local function apply_light(self)
 end
 
 function init(self)
-
 	self.wall_list = {}
 	self.floor_list = {}
 	self.position = go.get_position()
@@ -63,6 +62,15 @@ function init(self)
 	else
 		draw()
 	end
+	go.animate(".", "position.z", go.PLAYBACK_LOOP_PINGPONG, 0.7, go.EASING_INOUTSINE, 3)
+end
+
+local HALF_PI = math.pi / 2
+function update(self)
+	local pos = go.get_position()
+	local angle = math.atan2(MAP.player_position.y - pos.y, MAP.player_position.x - pos.x) + 3 * HALF_PI
+	local rot = vmath.quat_rotation_x(math.pi * 0.5) * vmath.quat_rotation_y(angle)
+	go.set_rotation(rot)
 end
 
 

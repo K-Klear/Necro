@@ -1,10 +1,11 @@
 local MAP = require "modules.map_objects"
 local INV = require "modules.inventory"
+local BLD = require "modules.build"
 local STATS = require "modules.stats"
 
 local move_vector = vmath.vector3(0, 0, 0)
 local move_speed = 2.5 / 256
-local run_multiplier = 3
+local run_multiplier = {[true] = 3, [false] = 1}
 local rotation_speed = 0.02
 local mouse_rotation_sensitivity = 0.2
 local mouse_pitch_sensitivity = 0.2
@@ -16,6 +17,7 @@ local camera_pitch = 0
 local active_camera = 1
 local cam_ortho_position = vmath.vector3(0, 6, 0)
 local cam_ortho_rotation = vmath.quat(0, 0, 0, 1)
+local cam_ortho_pitch = 70
 local cam_ortho_move_vector = vmath.vector3(0)
 
 local closest_torch_tab, second_closest_torch_tab
@@ -28,6 +30,11 @@ local move_mode = MOVE_MODE_NORMAL
 local CAMERA_DEBUG = "#cam_2d"
 local CAMERA_POV = "/cam_pitch#camera"
 local CAMERA_ORTHO = "/cam_orthographic_pitch#camera_orthographic"
+
+local target = hash("air")
+local target_distance = 0
+
+local CHECK_DISTANCE = 2
 
 local function switch_cam()
 	active_camera = active_camera + 1
@@ -161,6 +168,11 @@ local function set_player_position(change)
 	change = change or vmath.vector3()
 	player_position = player_position + change
 	go.set_position(player_position, ".")
+	if active_camera == 2 then
+		MAP.player_position = player_position
+	else
+		MAP.player_position = cam_ortho_position
+	end
 	local new_x, new_y = math.ceil(player_position.x), math.ceil(player_position.y)
 	if not (new_x == player_x and new_y == player_y) then
 		player_x, player_y = new_x, new_y
@@ -176,6 +188,15 @@ end
 
 local step_in_progress = false
 local shamble_progress = 65
+
+local label_strings = {
+	[hash("air")] = "- -",
+	[hash("floor")] = "floor",
+	[hash("ceiling")] = "ceiling",
+	[hash("wall")] = "wall",
+	[hash("rat")] = "rat",
+	[hash("box")] = "box"
+}
 
 function update(self, dt)
 	if move_mode == MOVE_MODE_NORMAL then
@@ -209,17 +230,85 @@ function update(self, dt)
 		end
 	end
 	cam_ortho_position = cam_ortho_position + vmath.rotate(cam_ortho_rotation, cam_ortho_move_vector)
+	cam_ortho_position.z = 3
 	go.set_position(cam_ortho_position, "cam_orthographic")
+
 	cam_ortho_move_vector = vmath.vector3(0)
 	move_vector = vmath.vector3(0)
+
+	local ray_target = player_position + vmath.rotate(player_rotation, vmath.vector3(0, CHECK_DISTANCE, 0))
+	local ray = physics.raycast(player_position, ray_target, {hash("wall"), hash("entity")}, {all = true})
+	local angle_tan = math.tan(math.rad(90 + camera_pitch))
+	local height
+	target, target_distance = nil, 0
+	if ray then
+		for key, val in ipairs(ray) do
+			height = player_position.z - (val.fraction * CHECK_DISTANCE) / angle_tan
+			if height < 0 or height > 1.5 then
+				break
+			else
+				if val.group == hash("wall") then
+					target = hash("wall")
+					target_distance = val.fraction * CHECK_DISTANCE
+					local pos = player_position + vmath.rotate(player_rotation, vmath.vector3(0, target_distance, 0))
+					pos.z = height
+					go.set_position(pos, "/red_dot")
+					target_distance = vmath.length(pos - player_position)
+					break
+				elseif val.group == hash("entity") then
+					local target_z = go.get_position(val.id).z
+					local target_url = msg.url(nil, val.id, "script")
+					if height > target_z and height < (target_z + go.get(target_url, "height")) then
+						target = target_url
+						target_distance = val.fraction * CHECK_DISTANCE
+						local pos = player_position + vmath.rotate(player_rotation, vmath.vector3(0, target_distance, 0))
+						pos.z = height
+						go.set_position(pos, "/red_dot")
+						target_distance = vmath.length(pos - player_position)
+						break
+					end
+				end
+			end
+		end
+	end
+	if not target then
+		height = player_position.z - CHECK_DISTANCE / angle_tan
+		local pos
+		if height > 1.5 then
+			target = hash("ceiling")
+			angle_tan = math.tan(math.rad(90 - camera_pitch))
+			target_distance = CHECK_DISTANCE - ((height - 1.5) * angle_tan)
+			pos = player_position + vmath.rotate(player_rotation, vmath.vector3(0, target_distance, 0))
+			pos.z = 1.5
+			target_distance = vmath.length(pos - player_position)
+		elseif height < 0 then
+			target = hash("floor")
+			target_distance = angle_tan * player_position.z
+			pos = player_position + vmath.rotate(player_rotation, vmath.vector3(0, target_distance, 0))
+			pos.z = 0
+			target_distance = vmath.length(pos - player_position)
+			if BLD.selected_building then
+				BLD.selected_position = vmath.vector3(math.floor(pos.x) + 0.5, math.floor(pos.y) + 0.5, 0)
+				go.set_position(BLD.selected_position, "/build_cursor")
+			end
+		else
+			target = hash("air")
+			target_distance = CHECK_DISTANCE
+			pos = player_position + vmath.rotate(player_rotation, vmath.vector3(0, CHECK_DISTANCE, 0))
+			pos.z = height
+			target_distance = 0
+		end
+		go.set_position(pos, "/red_dot")
+	end
+	label.set_text("hud#label", label_strings[target] or label_strings[go.get(target, "name")] or "- -")
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("contact_point_response") then
-		if message.other_group == hash("wall") then
+		if message.other_group == hash("wall") and message.distance > 0 then
 			set_player_position(message.normal * message.distance)
 		end
-	elseif message_id == hash("inventory_toggled") then
+	elseif message_id == hash("menu_toggled") then
 		if message.open then
 			msg.post(".", hash("release_input_focus"))
 		else
@@ -230,9 +319,9 @@ function on_message(self, message_id, message, sender)
 	end
 end
 
-local function toggle_inventory()
+local function toggle_inventory(container)
 	window.set_mouse_lock(false)
-	INV.toggle()
+	INV.toggle(container)
 end
 
 
@@ -247,75 +336,86 @@ f = nil
 
 local shift_held = false
 function on_input(self, action_id, action)
-	if action_id == hash("touch") and not cooldown then
-		cooldown = true
-		local frame = 1
-		local function animate_arm(self, handle, time_elapsed)
-			msg.post("/cam_pitch#model"..frame, hash("disable"))
-			frame = frame + 1
-			if frame > 9 then
-				timer.cancel(handle)
-				cooldown = false
-			else
-				msg.post("/cam_pitch#model"..frame, hash("enable"))
-				go.set_scale(frame_dimensions[frame], "/cam_pitch")
+	if BLD.selected_building then
+		if action_id == hash("touch") and action.pressed and BLD.valid_placement then
+			BLD.build()
+		end
+	else
+		if action_id == hash("touch") and not cooldown then
+			cooldown = true
+			local frame = 1
+			local function animate_arm(self, handle, time_elapsed)
+				msg.post("/cam_pitch#model"..frame, hash("disable"))
+				frame = frame + 1
+				if frame > 9 then
+					timer.cancel(handle)
+					timer.delay(0.14, false, function() cooldown = false end)
+				else
+					msg.post("/cam_pitch#model"..frame, hash("enable"))
+					go.set_scale(frame_dimensions[frame], "/cam_pitch")
+					if frame == 7 then
+						if target == hash("air") or target_distance > 0.6 then
+							sound.play("#miss", {speed = 0.75})
+						elseif target == hash("wall") or target == hash("ceiling") or target == hash("floor") then
+							sound.play("#hit_wall")
+						else
+							sound.play("#hit", {speed = 0.5})
+							msg.post(target, hash("hit"), {damage = 10})
+						end
+
+					end
+				end
+			end
+			local sc = frame_dimensions[1]
+			go.set_scale(sc, "/cam_pitch")
+			msg.post("/cam_pitch#model1", hash("enable"))
+			timer.delay(0.07, true, animate_arm)
+		elseif action_id == hash("mouse_button_right") and action.pressed and not cooldown then
+			if not label_strings[target] then
+				local container_id = go.get(target, "container_id")
+				if container_id > 0 then
+					toggle_inventory(container_id)
+				end
 			end
 		end
-		local sc = frame_dimensions[1]
-		go.set_scale(sc, "/cam_pitch")
-		msg.post("/cam_pitch#model1", hash("enable"))
-		timer.delay(0.07, true, animate_arm)
 	end
 	if action_id == hash("key_w") then
 		if active_camera < 3 then
-			if shift_held then
-				move_vector.y = move_vector.y + move_speed * run_multiplier
-			else
-				move_vector.y = move_vector.y + move_speed
-			end
+			move_vector.y = move_vector.y + move_speed * run_multiplier[shift_held]
 		else
-			cam_ortho_move_vector.y = cam_ortho_move_vector.y - move_speed * 0.01
+			cam_ortho_move_vector.y = cam_ortho_move_vector.y + move_speed * 5 * run_multiplier[shift_held]
 		end
 	elseif action_id == hash("key_s") then
 		if active_camera < 3 then
-			if shift_held then
-				move_vector.y = move_vector.y - move_speed * run_multiplier
-			else
-				move_vector.y = move_vector.y - move_speed
-			end
+			move_vector.y = move_vector.y - move_speed * run_multiplier[shift_held]
 		else
-			cam_ortho_move_vector.y = cam_ortho_move_vector.y + move_speed * 0.01
+			cam_ortho_move_vector.y = cam_ortho_move_vector.y - move_speed * 5 * run_multiplier[shift_held]
 		end
 	elseif action_id == hash("key_a") then
 		if active_camera == 1 then
 			player_rotation = player_rotation * vmath.quat_rotation_z(rotation_speed)
 			go.set_rotation(player_rotation, ".")
 		elseif active_camera == 2 then
-			if shift_held then
-				move_vector.x = move_vector.x - move_speed * run_multiplier
-			else
-				move_vector.x = move_vector.x - move_speed
-			end
+			move_vector.x = move_vector.x - move_speed * run_multiplier[shift_held]
 		else
-			cam_ortho_move_vector.x = cam_ortho_move_vector.x - move_speed * 0.01
+			cam_ortho_move_vector.x = cam_ortho_move_vector.x - move_speed * 5 * run_multiplier[shift_held]
 		end
 	elseif action_id == hash("key_d") then
 		if active_camera == 1 then
 			player_rotation = player_rotation * vmath.quat_rotation_z(-rotation_speed)
 			go.set_rotation(player_rotation, ".")
 		elseif active_camera == 2 then
-			if shift_held then
-				move_vector.x = move_vector.x + move_speed * run_multiplier
-			else
-				move_vector.x = move_vector.x + move_speed
-			end
+			move_vector.x = move_vector.x + move_speed * run_multiplier[shift_held]
 		else
-			cam_ortho_move_vector.x = cam_ortho_move_vector.x + move_speed * 0.01
+			cam_ortho_move_vector.x = cam_ortho_move_vector.x + move_speed * 5 * run_multiplier[shift_held]
 		end
 	elseif action_id == hash("key_space") and action.pressed then
 		switch_cam()
 	elseif action_id == hash("key_tab") and action.pressed then
 		toggle_inventory()
+	elseif action_id == hash("key_b") and action.pressed then
+		window.set_mouse_lock(false)
+		BLD.toggle()
 	elseif action_id == hash("key_lshift") then
 		shift_held = not action.released
 	elseif not action_id then
@@ -325,9 +425,16 @@ function on_input(self, action_id, action)
 			go.set("/cam_pitch", "euler.x", camera_pitch)
 			go.set_rotation(player_rotation, ".")
 		elseif active_camera == 3 then
-			local yaw = vmath.quat_rotation_y(-action.dx * rotation_speed * mouse_rotation_sensitivity)
+			local yaw = vmath.quat_rotation_z(-action.dx * rotation_speed * mouse_rotation_sensitivity)
+			cam_ortho_pitch = cam_ortho_pitch + action.dy * mouse_rotation_sensitivity
 			cam_ortho_rotation = cam_ortho_rotation * yaw
 			go.set_rotation(cam_ortho_rotation, "/cam_orthographic")
+			if cam_ortho_pitch > 80 then
+				cam_ortho_pitch = 80
+			elseif cam_ortho_pitch < 35 then
+				cam_ortho_pitch = 35
+			end
+			go.set("/cam_orthographic_pitch", "euler.x", cam_ortho_pitch)
 		end
 	end
 end

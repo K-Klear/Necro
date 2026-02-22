@@ -1,7 +1,9 @@
 local INV = require "modules.inventory"
 
+local current_container = nil
 
 local function update_slot(slot_tab)
+	if not slot_tab.item then return end
 	if slot_tab.item.count > 1 then
 		msg.post(msg.url(nil, slot_tab.item.go, "label"), hash("enable"))
 		label.set_text(msg.url(nil, slot_tab.item.go, "label"), slot_tab.item.count)
@@ -13,7 +15,7 @@ end
 
 local function create_item(item_tab)
 	local slot = INV.slots[item_tab.slot]
-	local item_go = factory.create("#spawn_item")
+	local item_go = factory.create("#spawn_item", vmath.vector3(0))
 	go.set_parent(item_go, slot.go)
 	sprite.play_flipbook(msg.url(nil, item_go, "sprite"), INV.item_props[item_tab.type].image)
 	if item_tab.count > 1 then
@@ -31,6 +33,17 @@ local function create_item(item_tab)
 	end
 end
 
+local function delete_item(item_tab)
+	for key, val in ipairs(INV.items) do
+		if val == item_tab then
+			table.remove(INV.items, key)
+			break
+		end
+	end
+	INV.slots[item_tab.slot].item = false
+	go.delete(item_tab.go)
+	item_tab.go = nil
+end
 
 local function add_item(type, count)
 	count = count or 1
@@ -42,7 +55,7 @@ local function add_item(type, count)
 				INV.slots[key].item = new_item
 				create_item(new_item)
 				return true
-			elseif val.item.type == type and val.item.count < INV.item_props[type].max_stack then
+			elseif val.item.type == type and INV.item_props[type].stackable then
 				val.item.count = val.item.count + count
 				update_slot(val)
 				return true
@@ -97,49 +110,112 @@ local function place_item(slot_id)
 		return_item()
 	elseif slot_id == INV.held_item.slot then
 		return_item()
+	elseif slot_tab.item.type == INV.held_item.type and INV.item_props[slot_tab.item.type].stackable then
+		local count = slot_tab.item.count
+		delete_item(slot_tab.item)
+		INV.slots[INV.held_item.slot].item = false
+		INV.held_item.slot = slot_id
+		slot_tab.item = INV.held_item
+		slot_tab.item.count = slot_tab.item.count + count
+		return_item()
+		update_slot(slot_tab)
 	end
 end
 
-function init(self)
-	for i = 1, 14 do
-		local game_object
-		if i < 10 then
-			game_object = "/inventory_slot_0"..i
-		else
-			game_object = "/inventory_slot_"..i
+local function show_container(container_id)
+	current_container = container_id
+	msg.post("#background_box", hash("enable"))
+	for i = 21, 28 do
+		msg.post(INV.slots[i].go, hash("enable"))
+		local item_tab = INV.containers[container_id].slots[i].item
+		if item_tab then
+			add_item_to_slot(item_tab.type, item_tab.count, item_tab.slot)
 		end
-		INV.slots[i] = {item = false, go = game_object, slot_type = hash("backpack")}
+		update_slot(INV.slots[i])
 	end
-	INV.slots[15] = {item = false, go = "/inventory_slot_eyes", slot_type = hash("eyes")}
-	INV.slots[16] = {item = false, go = "/inventory_slot_arm_right", slot_type = hash("arm_right")}
-	INV.slots[17] = {item = false, go = "/inventory_slot_arm_left", slot_type = hash("arm_left")}
-	INV.slots[18] = {item = false, go = "/inventory_slot_leg_right", slot_type = hash("leg_right")}
-	INV.slots[19] = {item = false, go = "/inventory_slot_leg_left", slot_type = hash("leg_left")}
-	add_item_to_slot("cat_eye", 1, 15)
-	add_item_to_slot("normal_leg", 1, 18)
-	add_item_to_slot("normal_leg", 1, 19)
-	
-	add_item("normal_leg")
-	add_item("normal_leg")
-	add_item("zombie_leg")
-	add_item("zombie_leg")
-	--add_item("diseased_eye")
-	add_item("human_eye")
-	add_item("rat_eye")
-	--add_item("bat_eye")
-	add_item("cat_eye")
-	add_item("spider_eye")
+end
+
+local function close_container()
+	if not current_container then return end
+	msg.post("#background_box", hash("disable"))
+	for i = 1, 19 do
+		msg.post(INV.slots[i].go, hash("disable"))
+	end
+	for i = 21, 28 do
+		INV.containers[current_container].slots[i].item = INV.slots[i].item
+		if INV.slots[i].item then
+			delete_item(INV.slots[i].item)
+		end
+		msg.post(INV.slots[i].go, hash("disable"))
+	end
+	current_container = nil
+end
+
+local function open_inventory(container_id)
+	msg.post(".", hash("acquire_input_focus"))
+	msg.post(".", hash("enable"))
+	for key, val in ipairs(INV.items) do
+		msg.post(val.go, hash("enable"))
+	end
+	for i = 1, 19 do
+		msg.post(INV.slots[i].go, hash("enable"))
+		update_slot(INV.slots[i])
+	end
+	if container_id then
+		msg.post("#background_box", hash("enable"))
+		show_container(container_id)
+	else
+		msg.post("#background_box", hash("disable"))
+	end
+end
+
+local function close_inventory()
+	msg.post(".", hash("disable"))
+	--msg.post("#background_box", hash("disable"))
+	for key, val in ipairs(INV.items) do
+		msg.post(val.go, hash("disable"))
+	end
+	for i = 1, 19 do
+		msg.post(INV.slots[i].go, hash("disable"))
+	end
+	close_container()
+	msg.post(".", hash("release_input_focus"))
+end
+
+function init(self)
+	timer.delay(0, false, function()
+		add_item_to_slot("cat_eye", 1, 15)
+		add_item_to_slot("normal_leg", 1, 18)
+		add_item_to_slot("normal_leg", 1, 19)
+		--[[
+		add_item("normal_leg")
+		add_item("normal_leg")
+		add_item("zombie_leg")
+		add_item("zombie_leg")
+		--add_item("diseased_eye")
+		add_item("human_eye")
+		add_item("rat_eye")
+		--add_item("bat_eye")
+		add_item("cat_eye")
+		add_item("spider_eye")
+		--]]
+		close_inventory()
+	end)
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("hover_start") then
-		if INV.hover then
+		if INV.hover and INV.slots[INV.hover].item then
 			msg.post("#lbl_item_name", hash("enable"))
 			local item_type = INV.slots[INV.hover].item.type
 			label.set_text("#lbl_item_name", INV.item_props[item_type].name)
 		end
 	elseif message_id == hash("hover_end") then
 		msg.post("#lbl_item_name", hash("disable"))
+	elseif message_id == hash("open") then
+		open_inventory(message.container)
+	elseif message_id == hash("close") then
+		close_inventory()
 	end
 end
 
@@ -156,7 +232,7 @@ function on_input(self, action_id, action)
 		else
 			return_item()
 		end
-	elseif action_id == hash("key_tab") and action.pressed then
+	elseif (action_id == hash("key_tab") or action_id == hash("key_esc")) and action.pressed then
 		INV.toggle()
 	elseif not action_id then
 		go.set_position(vmath.vector3(action.x, action.y, 0), "/cursor")

@@ -1,8 +1,9 @@
 local STATS = {}
 
 STATS.sight_range = 50
-
 STATS.render_target = hash("normal")
+
+STATS.arm_reach = 0.6
 
 local rt = {
 	[hash("normal")] = {"/rt_quad"},

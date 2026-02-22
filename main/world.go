@@ -26,3 +26,15 @@ embedded_components {
   data: "prototype: \"/main/entities/rat.go\"\n"
   ""
 }
+embedded_components {
+  id: "create_box"
+  type: "factory"
+  data: "prototype: \"/main/objects/box.go\"\n"
+  ""
+}
+embedded_components {
+  id: "create_beacon"
+  type: "factory"
+  data: "prototype: \"/main/objects/beacon.go\"\n"
+  ""
+}

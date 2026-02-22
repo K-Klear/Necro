@@ -28,11 +28,72 @@ instances {
   id: "cam_pitch"
   prototype: "/main/player/cam_pitch.go"
 }
+instances {
+  id: "rat"
+  prototype: "/main/entities/rat.go"
+  position {
+    x: 1.5
+  }
+}
+instances {
+  id: "hud"
+  prototype: "/main/player/hud.go"
+  scale3 {
+    x: 0.001
+    y: 0.001
+    z: 0.001
+  }
+}
+instances {
+  id: "red_dot"
+  prototype: "/main/red_dot.go"
+  position {
+    x: 1.0
+    y: 1.0
+    z: 0.2
+  }
+  rotation {
+    x: 0.70710677
+    w: 0.70710677
+  }
+  scale3 {
+    x: 0.1
+    y: 0.1
+    z: 0.1
+  }
+}
+instances {
+  id: "box"
+  prototype: "/main/objects/box.go"
+  position {
+    x: 1.5
+    y: 1.5
+  }
+}
+instances {
+  id: "box1"
+  prototype: "/main/objects/box.go"
+  position {
+    x: 1.5
+    y: 3.5
+  }
+}
+instances {
+  id: "build_cursor"
+  prototype: "/main/menus/build/build_cursor.go"
+  position {
+    x: 4.5
+    y: 6.5
+  }
+}
 scale_along_z: 0
 embedded_instances {
   id: "cam_orthographic"
   children: "cam_orthographic_pitch"
   data: ""
+  position {
+    z: 1.0
+  }
 }
 embedded_instances {
   id: "cam_orthographic_pitch"
@@ -48,8 +109,8 @@ embedded_instances {
   "}\n"
   ""
   rotation {
-    x: -0.38268343
-    w: 0.9238795
+    x: 0.57357645
+    w: 0.81915206
   }
 }
 embedded_instances {

@@ -83,7 +83,7 @@ function init(self)
 			end
 		end
 	end
-	local new_rat = factory.create("#spawn_rat", vmath.vector3(0.5, 0.5, 0), vmath.quat_rotation_x(math.pi * 0.5), {x = 0, y = 0}, vmath.vector3(2/256))
+	local new_rat = factory.create("#spawn_rat", vmath.vector3(0.5, 0.5, 0), vmath.quat_rotation_x(math.pi * 0.5), {x = 0, y = 0})
 end
 
 function update(self, dt)

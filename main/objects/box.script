@@ -1,0 +1,10 @@
+local INV = require "modules.inventory"
+
+go.property("height", 0.25)
+go.property("name", hash("box"))
+go.property("container_id", 0)
+
+function init(self)
+	go.set_scale(vmath.vector3(0.25))
+	INV.create_container(self)
+end

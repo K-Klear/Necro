@@ -1,29 +1,25 @@
 local proxies_loaded = 0
 
 function init(self)
+	math.randomseed(os.time())
+
 	msg.post("@render:", hash("set_menu_camera"), {menu_view = camera.get_view("#menu_cam"), menu_proj = camera.get_projection("#menu_cam")})
 	msg.post("#main", hash("async_load"))
-	msg.post("#inventory", hash("async_load"))
+	msg.post("#menus", hash("async_load"))
 end
 
 function update(self)
+	
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash("toggle_inventory") then
-		if message.is_open then
-			msg.post("#main", "set_time_step", {factor = 0, mode = 0})
-			msg.post("#inventory", "enable")
-		else
-			msg.post("#main", "set_time_step", {factor = 1, mode = 0})
-			msg.post("#inventory", "disable")
-		end
-	elseif message_id == hash("proxy_loaded") then
+	if message_id == hash("proxy_loaded") then
 		proxies_loaded = proxies_loaded + 1
 		if proxies_loaded > 1 then
 			msg.post("#main", "enable")
+			msg.post("#menus", "enable")
 			msg.post("#main", "acquire_input_focus")
-			msg.post("#inventory", "acquire_input_focus")
+			--msg.post("#menus", "acquire_input_focus")
 		end
 	end
 end

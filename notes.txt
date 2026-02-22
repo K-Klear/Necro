@@ -1,0 +1,2 @@
+- Handle player collisions with multiple colliders better
+- Deleting containers will cause issues due to INV.containers being potentially a sparse array

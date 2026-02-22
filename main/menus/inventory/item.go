@@ -5,7 +5,7 @@ embedded_components {
   "material: \"/render/materials/menu_sprite.material\"\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/assets/gfx/inventory/inventory.atlas\"\n"
+  "  texture: \"/assets/gfx/menus.atlas\"\n"
   "}\n"
   ""
   position {
@@ -25,12 +25,11 @@ embedded_components {
   "material: \"/render/materials/label_menu_df.material\"\n"
   ""
   position {
-    x: 24.0
-    y: -24.0
+    x: 39.0
+    y: -49.0
   }
   scale {
-    x: 0.25
-    y: 0.25
-    z: 0.25
+    x: 0.75
+    y: 0.75
   }
 }

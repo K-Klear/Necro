@@ -1,6 +1,6 @@
 components {
   id: "inventory"
-  component: "/main/inventory/inventory.script"
+  component: "/main/menus/inventory/inventory.script"
 }
 embedded_components {
   id: "background"
@@ -20,7 +20,7 @@ embedded_components {
   "size_mode: SIZE_MODE_MANUAL\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/assets/gfx/inventory/inventory.atlas\"\n"
+  "  texture: \"/assets/gfx/menus.atlas\"\n"
   "}\n"
   ""
   position {
@@ -30,7 +30,7 @@ embedded_components {
 embedded_components {
   id: "spawn_item"
   type: "factory"
-  data: "prototype: \"/main/inventory/item.go\"\n"
+  data: "prototype: \"/main/menus/inventory/item.go\"\n"
   ""
 }
 embedded_components {
@@ -48,5 +48,31 @@ embedded_components {
     x: 172.0
     y: 190.0
     z: -0.9
+  }
+}
+embedded_components {
+  id: "background_box"
+  type: "sprite"
+  data: "default_animation: \"slot\"\n"
+  "material: \"/render/materials/menu_sprite.material\"\n"
+  "slice9 {\n"
+  "  x: 32.0\n"
+  "  y: 32.0\n"
+  "  z: 32.0\n"
+  "  w: 32.0\n"
+  "}\n"
+  "size {\n"
+  "  x: 400.0\n"
+  "  y: 520.0\n"
+  "}\n"
+  "size_mode: SIZE_MODE_MANUAL\n"
+  "textures {\n"
+  "  sampler: \"texture_sampler\"\n"
+  "  texture: \"/assets/gfx/menus.atlas\"\n"
+  "}\n"
+  ""
+  position {
+    x: 583.0
+    z: -1.0
   }
 }

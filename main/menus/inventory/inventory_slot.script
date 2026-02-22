@@ -7,9 +7,9 @@ local COLOUR_NORMAL = vmath.vector4(1)
 local COLOUR_NETURAL = vmath.vector4(1, 1, 0, 1)
 local COLOUR_FORBIDDEN = vmath.vector4(1, 0, 0, 1)
 
-
 function init(self)
-
+	INV.slots[self.slot_id] = {item = false, go = go.get_id(), slot_type = self.slot_type}
+	msg.post(".", hash("disable"))
 end
 
 function on_message(self, message_id, message, sender)

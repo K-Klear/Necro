@@ -5,13 +5,15 @@ INV.held_item = nil
 
 INV.items = {}
 INV.slots = {}
+INV.containers = {}
 
 INV.item_props = {}
 INV.item_props.diseased_eye = {
-	image = "eye_01", max_stack = 1, name = "Eye (diseased)",
+	image = "eye_01", name = "Eye (diseased)",
 	allowed_slots = {
 		[hash("backpack")] = true,
-		[hash("eyes")] = true
+		[hash("eyes")] = true,
+		[hash("container")] = true
 	},
 	props = {
 		sight_range = 2,
@@ -20,10 +22,11 @@ INV.item_props.diseased_eye = {
 	}
 }
 INV.item_props.human_eye = {
-	image = "eye_01", max_stack = 1, name = "Human eye",
+	image = "eye_01", name = "Human eye",
 	allowed_slots = {
 		[hash("backpack")] = true,
-		[hash("eyes")] = true
+		[hash("eyes")] = true,
+		[hash("container")] = true
 	},
 	props = {
 		sight_range = 5,
@@ -32,10 +35,11 @@ INV.item_props.human_eye = {
 	}
 }
 INV.item_props.rat_eye = {
-	image = "eye_01", max_stack = 1, name = "Rat eye",
+	image = "eye_01", name = "Rat eye",
 	allowed_slots = {
 		[hash("backpack")] = true,
-		[hash("eyes")] = true
+		[hash("eyes")] = true,
+		[hash("container")] = true
 	},
 	props = {
 		sight_range = 7,
@@ -44,10 +48,11 @@ INV.item_props.rat_eye = {
 	}
 }
 INV.item_props.bat_eye = {
-	image = "eye_01", max_stack = 1, name = "Bat eye",
+	image = "eye_01", name = "Bat eye",
 	allowed_slots = {
 		[hash("backpack")] = true,
-		[hash("eyes")] = true
+		[hash("eyes")] = true,
+		[hash("container")] = true
 	},
 	props = {
 		sight_range = 1,
@@ -56,10 +61,11 @@ INV.item_props.bat_eye = {
 	}
 }
 INV.item_props.cat_eye = {
-	image = "eye_01", max_stack = 1, name = "Cat eye",
+	image = "eye_01", name = "Cat eye",
 	allowed_slots = {
 		[hash("backpack")] = true,
-		[hash("eyes")] = true
+		[hash("eyes")] = true,
+		[hash("container")] = true
 	},
 	props = {
 		sight_range = 40,
@@ -69,10 +75,11 @@ INV.item_props.cat_eye = {
 	}
 }
 INV.item_props.spider_eye = {
-	image = "eye_01", max_stack = 1, name = "Spider eye",
+	image = "eye_01", name = "Spider eye",
 	allowed_slots = {
 		[hash("backpack")] = true,
-		[hash("eyes")] = true
+		[hash("eyes")] = true,
+		[hash("container")] = true
 	},
 	props = {
 		sight_range = 8,
@@ -84,18 +91,20 @@ INV.item_props.spider_eye = {
 
 
 INV.item_props.bone = {
-	image = "bone_01", max_stack = 256, name = "Bone",
+	image = "bone_01", stackable = true, name = "Bone",
 	allowed_slots = {
 		[hash("backpack")] = true,
+		[hash("container")] = true
 	}
 }
 
 INV.item_props.zombie_leg = {
-	image = "bone_01", max_stack = 1, name = "Leg (Zombie)",
+	image = "bone_01", name = "Leg (Zombie)",
 	allowed_slots = {
 		[hash("backpack")] = true,
 		[hash("leg_right")] = true,
-		[hash("leg_left")] = true
+		[hash("leg_left")] = true,
+		[hash("container")] = true
 	},
 	props = {
 		movement_mode = hash("shamble"),
@@ -103,19 +112,36 @@ INV.item_props.zombie_leg = {
 	}
 }
 INV.item_props.normal_leg = {
-	image = "bone_01", max_stack = 1, name = "Leg",
+	image = "bone_01", name = "Leg",
 	allowed_slots = {
 		[hash("backpack")] = true,
 		[hash("leg_right")] = true,
-		[hash("leg_left")] = true
+		[hash("leg_left")] = true,
+		[hash("container")] = true
 	},
 	props = {
 		movement_mode = hash("normal"),
 		durability_max = 100
 	}
 }
+INV.item_props.bone_dust = {
+	image = "bone_dust", stackable = true, name = "Bone dust",
+	allowed_slots = {
+		[hash("backpack")] = true,
+		[hash("container")] = true
+	},
+	props = {
+	}
+}
 
-
+function INV.create_container(self)
+	local t = {slots = {}}
+	for slot_id = 21, 28 do
+		t.slots[slot_id] = {item = false}
+	end
+	table.insert(INV.containers, t)
+	self.container_id = #INV.containers
+end
 
 function INV.check_slot_eligibility(slot_id)
 	local slot_tab = INV.slots[slot_id]
@@ -138,30 +164,15 @@ function INV.check_slot_eligibility(slot_id)
 	end
 end
 
-function INV.toggle()
+function INV.toggle(container)
 	INV.open = not INV.open
-	msg.post(msg.url("main", "/player", nil), hash("inventory_toggled"), {open = INV.open})
+	msg.post(msg.url("main", "/player", nil), hash("menu_toggled"), {open = INV.open})
 	if INV.open then
-		msg.post(msg.url("inventory", "/inventory", nil), hash("acquire_input_focus"))
+		msg.post(msg.url("menu", "/inventory", nil), hash("open"), {container = container})
 	else
-		msg.post(msg.url("inventory", "/inventory", nil), hash("release_input_focus"))
+		msg.post(msg.url("menu", "/inventory", nil), hash("close"))
 	end
-	msg.post(msg.url("bootstrap", "/go", nil), hash("toggle_inventory"), {is_open = INV.open})
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

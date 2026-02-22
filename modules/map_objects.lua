@@ -1,5 +1,7 @@
 local MAP = {}
 
+MAP.player_position = vmath.vector3()
+
 MAP.walls = {}
 MAP.floors = {}
 MAP.objects = {}
